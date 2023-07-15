@@ -9,6 +9,14 @@ app.get('/', (req, res, next) => {
   })
 })
 
+const { User } = require('./models')
+async function test() {
+  const users = await User.findAll({ raw: true })
+  console.log(users)
+}
+
+test()
+
 app.listen(port, () => {
   console.log(`Now listening on http://localhost:${port}`)
 })
