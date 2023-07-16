@@ -1,21 +1,20 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const express = require('express')
+const passport = require('./config/passport')
+const router = require('./routes')
+const bodyParser = require('body-parser')
 
 const app = express()
 const port = process.env.PORT || 3000
 
-app.get('/', (req, res, next) => {
-  res.json({
-    "message": "hello world"
-  })
-})
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(passport.initialize())
 
-const { User } = require('./models')
-async function test() {
-  const users = await User.findAll({ raw: true })
-  console.log(users)
-}
-
-test()
+app.use(router)
 
 app.listen(port, () => {
   console.log(`Now listening on http://localhost:${port}`)
