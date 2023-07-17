@@ -22,7 +22,7 @@ module.exports = {
         image: `https://loremflickr.com/320/240/product/?lock=${Math.random() * 100}`,
         stock: Math.floor(Math.random() * 20) + 1,
         category_id: categories[Math.floor(Math.random() * categories.length)].id,
-        on_shelf: false,
+        on_shelf: true,
         version: 0,
         created_at: new Date(),
         updated_at: new Date()
