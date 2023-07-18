@@ -12,7 +12,13 @@ const errorHandler = (err, req, res, next) => {
 
     // 如果錯誤是 express-validator 產生的一個陣列 (轉的字串)，就傳給前端
     if (err.message.slice(0, 1) === '[') {
-      messages = JSON.parse(err.message)
+      const rawMessages = JSON.parse(err.message)
+      messages = []
+
+      for (let i = 0; i < rawMessages.length; i++) {
+        messages.includes(rawMessages[i]) ? false : messages.push(rawMessages[i])
+      }
+
     } else {
       messages = err.message
     }

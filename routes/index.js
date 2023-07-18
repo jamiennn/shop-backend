@@ -7,7 +7,7 @@ const { errorHandler } = require('../middleware/error-handler')
 const { authenticated } = require('../middleware/auth')
 
 router.use('/api/users', users)
-router.use('/api/products', authenticated, products)
+router.use('/api/products', products)
 
 router.use('/api', errorHandler)
 
