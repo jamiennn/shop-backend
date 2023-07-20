@@ -2,6 +2,7 @@ const { User, Product, Category } = require('../models')
 const { Op, literal } = require('sequelize')
 const { errorToFront } = require('../middleware/error-handler')
 const { getOffset, getPagination } = require('../helpers/pagination-helpers')
+const getQueryString = require('../helpers/query-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const {
@@ -9,29 +10,14 @@ const {
   productValidate,
   checkValidationResult
 } = require('../middleware/validator')
-// const { error } = require('console')
 
 const productController = {
   getProducts: async (req, res, next) => {
     try {
-      const DEFAUL_LIMIT = 25
-      const DEFAULT_MAX_PRICE = 10000
+      let { queryText, priceMax, priceMin, categoryIdArray, page, limit, shopId, offset } = getQueryString(req)
 
-      const keyword = req.query.keyword?.trim()?.toLowerCase() || null
-      const priceMax = Number(req.query.priceMax) || DEFAULT_MAX_PRICE
-      const priceMin = Number(req.query.priceMin) || 0
-
-      // 處理複選 categoryId的狀況
-      const categoryId = req.query.categoryId
-      const categoryIdArray = categoryId ? Array.isArray(categoryId) ? categoryId : [Number(categoryId)] : ''
-
-      const page = Number(req.query.page) || 1
-      const limit = Number(req.query.limit) || DEFAUL_LIMIT
-      const shopId = Number(req.query.shopId) || ''
-      const offset = getOffset(limit, page)
-
-      const queryText = keyword ? `Product.name LIKE '%${keyword.replace(/['"]+/g, '')}%'` : ''
-
+      const user = await User.findByPk(shopId)
+      if (!user.isSeller) throw new errorToFront('Invalid seller id')
 
       const [products, categories] = await Promise.all([
         Product.findAndCountAll({
@@ -41,7 +27,7 @@ const productController = {
               [Op.between]: [priceMin, priceMax],
             },
             ...categoryIdArray ? { categoryId: { [Op.or]: categoryIdArray } } : {},
-            ...shopId ? { shopId } : {},
+            userId: shopId,
             onShelf: true
           },
           attributes: ['id', 'userId', 'name', 'price', 'image'],
@@ -49,7 +35,7 @@ const productController = {
           offset,
           raw: true,
           nest: true,
-          order: [['price', 'desc']]
+          order: [['price', 'asc']]
         }),
         Category.findAll({ raw: true })
       ])
@@ -71,6 +57,7 @@ const productController = {
       const id = req.params.pid
       const product = await Product.findByPk(id, {
         include: [User, Category],
+        where: { onShelf: true },
         raw: true,
         nest: true
       })
@@ -130,7 +117,7 @@ const productController = {
 
         const [category, product] = await Promise.all([
           Category.findByPk(categoryId),
-          Product.findByPk(productId)
+          Product.findByPk(productId, { where: { onShelf: true } })
         ])
 
         if (!product) throw new errorToFront('Product doesn\'t exist')
