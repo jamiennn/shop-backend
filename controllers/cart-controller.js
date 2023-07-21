@@ -1,22 +1,20 @@
 const { Op } = require('sequelize')
-const { User, Product, Category, CartItem } = require('../models')
+const { User, Product, Category, CartItem, sequelize, Order, OrderItem } = require('../models')
 const { errorToFront } = require('../middleware/error-handler')
 const { notEmptyChain, checkValidationResult } = require('../middleware/validator')
+const preCheckHelper = require('../helpers/pre-check-helper')
 
 
 const cartController = {
   getCartItems: async (req, res, next) => {
     try {
-      const userId = Number(req.params.uid)
       const loginUserId = req.user.id
+      const user = await User.findByPk(loginUserId, { raw: true })
 
-      if (userId !== loginUserId) throw new errorToFront('Forbidden')
-
-      const user = await User.findByPk(userId, { raw: true })
-      if (!user || user.isSeller) throw new errorToFront('Forbidden')
+      preCheckHelper.isBuyer(!user || user.isSeller)
 
       const cartItems = await CartItem.findAll({
-        where: { userId, isOrdered: false },
+        where: { userId: loginUserId, isOrdered: false },
         include: [{
           model: Product,
           where: {
@@ -53,16 +51,16 @@ const cartController = {
             where: { productId, userId: loginUserId, isOrdered: false }
           })
         ])
-        if (!user || user.isSeller) throw new errorToFront('Forbidden')
-        if (!product) throw new errorToFront('Product doesn\'t exist')
-        if (product.stock < amount) throw new errorToFront(`There\'s only ${product.stock} left, please check the amount again`)
+
+        preCheckHelper.isBuyer(!user || user.isSeller)
+        preCheckHelper.isFound(product)
+        preCheckHelper.checkStock(product.name, product.stock, amount)
 
         let newCartItem
 
         if (cartItem) {
           const newAmount = Number(amount) + cartItem.amount
-
-          if (product.stock < newAmount) throw new errorToFront(`There\'s only ${product.stock} left, please check the amount again`)
+          preCheckHelper.checkStock(product.name, product.stock, newAmount)
 
           newCartItem = await cartItem.update({
             amount: newAmount
@@ -106,9 +104,9 @@ const cartController = {
           }],
         })
 
-        if (!cartItem) throw new errorToFront('Cart not found, this could be caused by the seller pulling products from the shelf')
-        if (cartItem.userId !== loginUserId) throw new errorToFront('Forbidden')
-        if (cartItem.Product.stock < amount) throw new errorToFront(`There\'s only ${cartItem.Product.stock} left, please check the amount again`)
+        preCheckHelper.isFound(cartItem)
+        preCheckHelper.userAuth(cartItem.userId, loginUserId)
+        preCheckHelper.checkStock(cartItem.Product.name, cartItem.Product.stock, amount)
 
         const newCartItem = await cartItem.update({
           amount: Number(amount)
@@ -130,7 +128,7 @@ const cartController = {
       const cartId = req.params.cid
       const cartItem = await CartItem.findByPk(cartId)
 
-      if (cartItem.userId !== loginUserId) throw new errorToFront('Forbidden')
+      preCheckHelper.userAuth(cartItem.userId, loginUserId)
 
       await cartItem.destroy()
 
@@ -141,6 +139,79 @@ const cartController = {
     } catch (e) {
       next(e)
     }
+  },
+  checkoutCart: async (req, res, next) => {
+    try {
+      const loginUserId = req.user.id
+
+      // 確認要下單的 user 身份
+      const user = await User.findByPk(loginUserId, { raw: true })
+      preCheckHelper.isBuyer(!user || user.isSeller)
+
+      // 找出他的購物車
+      const cartItems = await CartItem.findAll({
+        where: { userId: loginUserId, isOrdered: false },
+        include: [{
+          model: Product,
+          where: {
+            stock: { [Op.gt]: 0 },
+            onShelf: true
+          },
+          required: true
+        }],
+        raw: true,
+        nest: true
+      })
+
+      if (!cartItems.length) {
+        return res.json({
+          status: 'error',
+          message: 'User have no cart items'
+        })
+      }
+
+      // 確認有足夠庫存
+      cartItems.forEach(c => {
+        preCheckHelper.checkStock(c.Product.name, c.Product.stock, c.amount)
+      })
+
+      // 開始下單流程
+      const transacResult = await sequelize.transaction(async (t) => {
+
+        // 建立訂單
+        const newOrder = await Order.create({ userId: loginUserId }, { transaction: t })
+
+        // 先準備訂單的每一筆資料
+        const cartList = cartItems.map(c => ({
+          orderId: newOrder.id,
+          productId: c.productId,
+          amount: c.amount
+        }))
+
+        // 建立訂單的每一筆資料
+        const orderItems = await OrderItem.bulkCreate(cartList, { transaction: t })
+
+        // const delay = (delayInms) => {
+        //   return new Promise(resolve => setTimeout(resolve, delayInms));
+        // }
+        // await delay(10000)
+
+        // 購物車關閉
+        await CartItem.update({
+          isOrdered: true
+        }, { where: { userId: loginUserId } }, { transaction: t })
+
+        return {
+          order: newOrder,
+          orderItems
+        }
+      })
+
+      res.json({
+        status: 'success',
+        data: transacResult
+      })
+    } catch (e) { next(e) }
   }
 }
 

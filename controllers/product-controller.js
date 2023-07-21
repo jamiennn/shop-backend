@@ -1,4 +1,4 @@
-const { User, Product, Category } = require('../models')
+const { User, Product, Category, sequelize } = require('../models')
 const { Op, literal } = require('sequelize')
 const { errorToFront } = require('../middleware/error-handler')
 const { getOffset, getPagination } = require('../helpers/pagination-helpers')
@@ -125,17 +125,19 @@ const productController = {
         if (!category) throw new errorToFront('Category doesn\'t exist')
 
         const imagePath = await imgurFileHandler(file)
-        const editedProduct = await product.update({
+        const editedProduct = await Product.update({
           name, price, description,
           image: imagePath || product.image,
           stock, categoryId,
           onShelf: true,
           version: product.version + 1
-        })
+        }, { where: { id: product.id, version: product.version } })
 
+        let status
+        if (editedProduct[0] === 0) status = 'Update failed'
+        if (editedProduct[0] === 1) status = 'Success'
         res.json({
-          status: 'success',
-          data: { editedProduct }
+          status,
         })
       } catch (e) {
         next(e)
@@ -153,15 +155,17 @@ const productController = {
         if (!product) throw new errorToFront('Product doesn\'t exist')
         if (product.userId !== loginUserId) throw new errorToFront('Have no authority to edit products')
 
-        const pulledProduct = await product.update({
+        const pulledProduct = await Product.update({
           ...product,
           onShelf: 0,
           version: product.version + 1
-        })
+        }, { where: { id: product.id, version: product.version } })
 
+        let status
+        if (pulledProduct[0] === 0) status = 'Update failed'
+        if (pulledProduct[0] === 1) status = 'Success'
         res.json({
-          status: 'success',
-          data: { pulledProduct }
+          status,
         })
       } catch (e) {
         next(e)
