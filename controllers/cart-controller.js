@@ -53,7 +53,7 @@ const cartController = {
         ])
 
         preCheckHelper.isBuyer(!user || user.isSeller)
-        preCheckHelper.isFound(product)
+        preCheckHelper.isFound(product, 'Product')
         preCheckHelper.checkStock(product.name, product.stock, amount)
 
         let newCartItem
@@ -104,7 +104,7 @@ const cartController = {
           }],
         })
 
-        preCheckHelper.isFound(cartItem)
+        preCheckHelper.isFound(cartItem, 'Cart item')
         preCheckHelper.userAuth(cartItem.userId, loginUserId)
         preCheckHelper.checkStock(cartItem.Product.name, cartItem.Product.stock, amount)
 

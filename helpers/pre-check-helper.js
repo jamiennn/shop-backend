@@ -7,8 +7,8 @@ const preCheckHelper = {
   userAuth: (userId1, userId2) => {
     if (userId1 !== userId2) throw new errorToFront('Forbidden2')
   },
-  isFound: (item) => {
-    if (!item) throw new errorToFront(`Item not found`)
+  isFound: (item, itemName) => {
+    if (!item) throw new errorToFront(`${itemName} not found`)
   },
   checkStock: (name, supply, demand) => {
     if (supply < demand) throw new errorToFront(`${name} has only ${supply} left, please check the amount again`)

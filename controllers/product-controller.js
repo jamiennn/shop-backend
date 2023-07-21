@@ -4,6 +4,8 @@ const { errorToFront } = require('../middleware/error-handler')
 const { getOffset, getPagination } = require('../helpers/pagination-helpers')
 const getQueryString = require('../helpers/query-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const preCheckHelper = require('../helpers/pre-check-helper')
+
 
 const {
   notEmptyChain,
@@ -62,7 +64,7 @@ const productController = {
         nest: true
       })
 
-      if (!product) throw new errorToFront('Product does\'nt exist')
+      preCheckHelper.isFound(product)
 
       res.json({ status: 'success', data: { product } })
     } catch (e) {
@@ -84,8 +86,9 @@ const productController = {
           Category.findByPk(categoryId)
         ])
 
-        if (!user || !user.isSeller) throw new errorToFront('User doesn\'t exist or have no authority to create products')
-        if (!category) throw new errorToFront('Category doesn\'t exist')
+        if (!user || !user.isSeller) throw new errorToFront('Forbidden')
+
+        preCheckHelper.isFound(category, 'Category')
 
         const imagePath = await imgurFileHandler(file)
         const product = await Product.create({
@@ -120,9 +123,9 @@ const productController = {
           Product.findByPk(productId, { where: { onShelf: true } })
         ])
 
-        if (!product) throw new errorToFront('Product doesn\'t exist')
-        if (product.userId !== loginUserId) throw new errorToFront('Have no authority to edit products')
-        if (!category) throw new errorToFront('Category doesn\'t exist')
+        preCheckHelper.isFound(product, 'Product')
+        preCheckHelper.userAuth(product.userId, loginUserId)
+        preCheckHelper.isFound(category, 'Category')
 
         const imagePath = await imgurFileHandler(file)
         const editedProduct = await Product.update({
@@ -152,8 +155,8 @@ const productController = {
 
         const product = await Product.findByPk(productId)
 
-        if (!product) throw new errorToFront('Product doesn\'t exist')
-        if (product.userId !== loginUserId) throw new errorToFront('Have no authority to edit products')
+        preCheckHelper.isFound(product, 'Product')
+        preCheckHelper.userAuth(product.userId, loginUserId)
 
         const pulledProduct = await Product.update({
           ...product,
