@@ -10,7 +10,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'errorToFront') {
     let messages
 
-    // 如果錯誤是 express-validator 產生的一個陣列 (轉的字串)，就傳給前端
+    // 如果錯誤是 express-validator 產生的一個陣列 (轉的字串)，先處理
     if (err.message.slice(0, 1) === '[') {
       const rawMessages = JSON.parse(err.message)
       messages = []

@@ -1,7 +1,7 @@
 const { Op } = require('sequelize')
 const { User, Product, Category, CartItem, sequelize, Order, OrderItem } = require('../models')
 const { errorToFront } = require('../middleware/error-handler')
-const { notEmptyChain, checkValidationResult } = require('../middleware/validator')
+const { notEmptyChain, checkAmount, checkValidationResult } = require('../middleware/validator')
 const preCheckHelper = require('../helpers/pre-check-helper')
 
 
@@ -34,6 +34,7 @@ const cartController = {
   },
   postCartItem: [
     notEmptyChain(['productId', 'amount']),
+    checkAmount(),
     async (req, res, next) => {
       try {
         checkValidationResult(req)
@@ -84,6 +85,7 @@ const cartController = {
   ],
   putCartItem: [
     notEmptyChain(['amount']),
+    checkAmount(),
     async (req, res, next) => {
       try {
         checkValidationResult(req)
@@ -128,6 +130,7 @@ const cartController = {
       const cartId = req.params.cid
       const cartItem = await CartItem.findByPk(cartId)
 
+      preCheckHelper.isFound(cartItem, 'Cart item')
       preCheckHelper.userAuth(cartItem.userId, loginUserId)
 
       await cartItem.destroy()

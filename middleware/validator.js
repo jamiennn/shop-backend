@@ -6,6 +6,7 @@ const PRODUCT_NAME_LENGTH = 50
 const PRICE_MAX = 50000
 const PRODUCT_DESCRIPTION_LENGTH = 10000
 const STOCK_MAX = 999999
+const DEFAULT_MAX_AMMOUNT = 999999
 
 
 const notEmptyChain = (sth) => {
@@ -38,6 +39,7 @@ const checkMinMax = (sth, min, max) => {
 
 const validator = {
   notEmptyChain,
+  checkAmount: () => checkMinMax('amount', 1, DEFAULT_MAX_AMMOUNT),
   registerValidate: [
     notEmptyChain(['account', 'email', 'password', 'checkPassword', 'isSeller']),
     checkEmailChain(),

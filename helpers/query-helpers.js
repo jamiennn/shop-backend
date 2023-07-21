@@ -1,7 +1,7 @@
 const { getOffset } = require('../helpers/pagination-helpers')
 
 const getQueryString = (req) => {
-  const DEFAUL_LIMIT = 24
+  const DEFAUL_LIMIT = 20
   const DEFAULT_MAX_PRICE = 50000
 
   const keyword = req.query.keyword?.trim()?.toLowerCase() || null

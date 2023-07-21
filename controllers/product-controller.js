@@ -136,9 +136,9 @@ const productController = {
           version: product.version + 1
         }, { where: { id: product.id, version: product.version } })
 
-        let status
-        if (editedProduct[0] === 0) status = 'Update failed'
-        if (editedProduct[0] === 1) status = 'Success'
+        let status = 'Success'
+        if (!editedProduct[0]) status = 'Update failed'
+
         res.json({
           status,
         })
