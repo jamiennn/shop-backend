@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/jamiennn/shop-backend#readme",
   "dependencies": {
+    "@faker-js/faker": "^8.0.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -35,10 +36,6 @@
     "passport-jwt": "^4.0.1",
     "sequelize": "^6.32.1",
     "sequelize-cli": "^6.6.1",
-    "tslib": "^2.6.0",
-    "@faker-js/faker": "^8.0.2"
-  },
-  "devDependencies": {
-    "@faker-js/faker": "^8.0.2"
+    "tslib": "^2.6.0"
   }
 }
