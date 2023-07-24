@@ -11,6 +11,7 @@ const {
   notEmptyChain,
   checkValidationResult
 } = require('../middleware/validator')
+const preCheckHelper = require('../helpers/pre-check-helper')
 
 
 const userController = {
@@ -83,6 +84,23 @@ const userController = {
         loginUser: userData
       }
     })
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const userId = req.params.uid
+      const user = await User.findOne({
+        where: { id: userId },
+        raw: true
+      })
+      preCheckHelper.isFound(user)
+      delete user.password
+      res.json({
+        status: 'success',
+        messages: { user }
+      })
+    } catch (e) {
+      next(e)
+    }
   }
 }
 

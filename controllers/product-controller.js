@@ -19,8 +19,9 @@ const productController = {
       let { queryText, priceMax, priceMin, categoryIdArray, page, limit, shopId, offset } = getQueryString(req)
 
       const user = await User.findByPk(shopId)
-      if (!user.isSeller) throw new errorToFront('Invalid seller id')
+      if (shopId && !user.isSeller) throw new errorToFront('Invalid seller id')
 
+      console.log('shopId', shopId)
       const [products, categories] = await Promise.all([
         Product.findAndCountAll({
           where: {
@@ -29,7 +30,7 @@ const productController = {
               [Op.between]: [priceMin, priceMax],
             },
             ...categoryIdArray ? { categoryId: { [Op.or]: categoryIdArray } } : {},
-            userId: shopId,
+            ...shopId ? { userId: shopId } : {},
             onShelf: true
           },
           attributes: ['id', 'userId', 'name', 'price', 'image'],

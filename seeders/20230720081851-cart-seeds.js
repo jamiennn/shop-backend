@@ -18,7 +18,7 @@ module.exports = {
       Array.from({ length: 15 }, (_, i) => ({
         user_id: users[Math.floor(Math.random() * users.length)].id,
         product_id: products[Math.floor(Math.random() * products.length)].id,
-        amount: Math.floor(Math.random() * 100) + 1,
+        amount: 1,
         is_ordered: false,
         created_at: new Date(),
         updated_at: new Date()

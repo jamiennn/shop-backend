@@ -1,7 +1,7 @@
 const { getOffset } = require('../helpers/pagination-helpers')
 
 const getQueryString = (req) => {
-  const DEFAUL_LIMIT = 20
+  const DEFAUL_LIMIT = 18
   const DEFAULT_MAX_PRICE = 50000
 
   const keyword = req.query.keyword?.trim()?.toLowerCase() || null
@@ -14,7 +14,7 @@ const getQueryString = (req) => {
 
   const page = Number(req.query.page) || 1
   const limit = Number(req.query.limit) || DEFAUL_LIMIT
-  const shopId = Number(req.params.uid) || ''
+  const shopId = Number(req.query.shopId) || ''
   const offset = getOffset(limit, page)
 
   const queryText = keyword ? `Product.name LIKE '%${keyword.replace(/['"]+/g, '')}%'` : ''

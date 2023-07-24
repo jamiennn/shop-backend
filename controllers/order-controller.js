@@ -129,10 +129,10 @@ const orderController = {
         preCheckHelper.checkStock(i.Product.name, i.Product.stock, i.amount)
       }
 
-      const delay = (delayInms) => {
-        return new Promise(resolve => setTimeout(resolve, delayInms));
-      }
-      await delay(5000)
+      // const delay = (delayInms) => {
+      //   return new Promise(resolve => setTimeout(resolve, delayInms));
+      // }
+      // await delay(5000)
 
       // 開始下單流程
 
