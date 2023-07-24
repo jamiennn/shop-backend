@@ -35,7 +35,8 @@
     "passport-jwt": "^4.0.1",
     "sequelize": "^6.32.1",
     "sequelize-cli": "^6.6.1",
-    "tslib": "^2.6.0"
+    "tslib": "^2.6.0",
+    "@faker-js/faker": "^8.0.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.0.2"
