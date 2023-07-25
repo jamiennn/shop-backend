@@ -29,6 +29,7 @@ const productController = {
             price: {
               [Op.between]: [priceMin, priceMax],
             },
+            stock: { [Op.gt]: 0 },
             ...categoryIdArray ? { categoryId: { [Op.or]: categoryIdArray } } : {},
             ...shopId ? { userId: shopId } : {},
             onShelf: true
