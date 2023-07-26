@@ -129,12 +129,9 @@ const orderController = {
         preCheckHelper.checkStock(i.Product.name, i.Product.stock, i.amount)
       }
 
-      // const delay = (delayInms) => {
-      //   return new Promise(resolve => setTimeout(resolve, delayInms));
-      // }
-      // await delay(5000)
 
-      // 開始下單流程
+
+      ////// 開始下單流程 //////
 
       // update product：stock 扣除購買數量，version + 1。update 時要附帶 where 查詢條件 version
       const t = await sequelize.transaction()

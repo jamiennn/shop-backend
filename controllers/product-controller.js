@@ -21,7 +21,7 @@ const productController = {
       const user = await User.findByPk(shopId)
       if (shopId && !user.isSeller) throw new errorToFront('Invalid seller id')
 
-      console.log('shopId', shopId)
+
       const [products, categories] = await Promise.all([
         Product.findAndCountAll({
           where: {

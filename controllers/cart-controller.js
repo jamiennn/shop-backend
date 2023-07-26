@@ -194,11 +194,6 @@ const cartController = {
         // 建立訂單的每一筆資料
         const orderItems = await OrderItem.bulkCreate(cartList, { transaction: t })
 
-        // const delay = (delayInms) => {
-        //   return new Promise(resolve => setTimeout(resolve, delayInms));
-        // }
-        // await delay(10000)
-
         // 購物車關閉
         await CartItem.update({
           isOrdered: true
