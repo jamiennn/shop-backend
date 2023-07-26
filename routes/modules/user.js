@@ -9,6 +9,7 @@ router.get('/:uid/products', productController.getProducts)
 router.get('/test-token', authenticated, userController.testToken)
 router.post('/register', userController.register)
 router.post('/login', userController.logIn)
+router.get('/:uid/orders', authenticated, userController.getUserOrders)
 router.get('/:uid', userController.getUser)
 
 module.exports = router

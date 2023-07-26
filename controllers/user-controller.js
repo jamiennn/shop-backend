@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User } = require('../models')
+const { User, Order, OrderItem, Product } = require('../models')
 const { Op } = require('sequelize')
 
 const { errorToFront } = require('../middleware/error-handler')
@@ -97,6 +97,33 @@ const userController = {
       res.json({
         status: 'success',
         messages: { user }
+      })
+    } catch (e) {
+      next(e)
+    }
+  },
+  getUserOrders: async (req, res, next) => {
+    try {
+      const userId = Number(req.params.uid)
+      const loginUserId = req.user.id
+      preCheckHelper.userAuth(userId, loginUserId)
+
+      const order = await Order.findAll({
+        where: { userId },
+        include: {
+          model: OrderItem,
+          include: {
+            model: Product,
+            required: true
+          },
+          required: true
+        }
+      })
+      preCheckHelper.isFound(order)
+
+      res.json({
+        status: 'success',
+        data: { order }
       })
     } catch (e) {
       next(e)
