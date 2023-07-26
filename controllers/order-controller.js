@@ -152,6 +152,22 @@ const orderController = {
         })
       )
 
+      // 將 product 當下的 name, price, image 存進 orderitem
+      const newOrderItems = await Promise.all(
+        orderItems.map(async i => {
+          const product = i.Product
+          const newOrderItem = await OrderItem.update({
+            productName: product.name,
+            productImage: product.image,
+            productPrice: product.price
+          }, {
+            where: { id: i.id },
+            transaction: t
+          })
+          return newOrderItem[0]
+        })
+      )
+
       // 訂單完成：isChecked = true
       const newOrder = await Order.update({
         isChecked: true
@@ -161,7 +177,7 @@ const orderController = {
       })
 
       // 如果依照 version 找不到資料，代表同一時間有人改過，就 rollback transaction
-      if (!newOrder[0] || newProducts.includes(0)) {
+      if (!newOrder[0] || newProducts.includes(0) || newOrderItems.includes(0)) {
         await t.rollback()
         return res.status(500).json({ message: 'Transaction failed' })
       }
