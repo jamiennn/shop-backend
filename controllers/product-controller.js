@@ -60,7 +60,10 @@ const productController = {
 
       const id = req.params.pid
       const product = await Product.findByPk(id, {
-        include: [User, Category],
+        include: [{
+          model: User,
+          attributes: ['id', 'account']
+        }, Category],
         where: { onShelf: true },
         raw: true,
         nest: true
