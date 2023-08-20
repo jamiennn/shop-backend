@@ -39,7 +39,7 @@ const productController = {
           offset,
           raw: true,
           nest: true,
-          order: [['price', 'asc']]
+          order: [['name', 'asc']]
         }),
         Category.findAll({ raw: true })
       ])
