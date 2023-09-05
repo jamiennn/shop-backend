@@ -8,7 +8,7 @@ module.exports = {
       const hash = await bcrypt.hash(password, salt)
       return hash
     }
-    const password = await genHash('titaner')
+    const password = await genHash('12345678')
 
     await queryInterface.bulkInsert('Users',
       Array.from({ length: 10 }, (_, i) => (

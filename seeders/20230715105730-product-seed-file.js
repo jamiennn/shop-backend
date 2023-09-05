@@ -24,8 +24,8 @@ module.exports = {
         category_id: categories[Math.floor(Math.random() * categories.length)].id,
         on_shelf: true,
         version: 0,
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: new Date(Date.now() - i * 60000).toISOString().substring(0, 16),
+        updated_at: new Date(Date.now() - i * 60000).toISOString().substring(0, 16)
       }))
     )
   },
