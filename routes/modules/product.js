@@ -5,6 +5,7 @@ const upload = require('../../middleware/multer')
 
 const productController = require('../../controllers/product-controller')
 
+router.get('/categories', productController.getCategories)
 router.get('/:pid', productController.getProduct)
 router.patch('/:pid', authenticated, productController.patchProduct)
 router.put('/:pid', authenticated, upload.single('image'), productController.putProduct)
