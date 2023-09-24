@@ -178,7 +178,18 @@ const productController = {
       } catch (e) {
         next(e)
       }
+    },
+  getCategories: async (req, res, next) => {
+    try {
+      const categories = await Category.findAll({ raw: true })
+      res.json({
+        status: 'success',
+        data: { categories }
+      })
+    } catch (e) {
+      next(e)
     }
+  }
 }
 
 module.exports = productController
