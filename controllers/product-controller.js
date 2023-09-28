@@ -16,7 +16,7 @@ const {
 const productController = {
   getProducts: async (req, res, next) => {
     try {
-      let { queryText, priceMax, priceMin, categoryIdArray, page, limit, shopId, offset } = getQueryString(req)
+      let { queryText, priceMax, priceMin, order, categoryIdArray, page, limit, shopId, offset } = getQueryString(req)
 
       const user = await User.findByPk(shopId)
       if (shopId && !user.isSeller) throw new errorToFront('Invalid seller id')
@@ -39,7 +39,7 @@ const productController = {
           offset,
           raw: true,
           nest: true,
-          order: [['createdAt', 'desc']]
+          order: [order]
         }),
         Category.findAll({ raw: true })
       ])
